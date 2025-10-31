@@ -42,6 +42,7 @@ return this.cpfc.filter(dish =>
 
 removeDish(name){
     this.cpfc = this.cpfc.filter(dish => dish.name !== name);
+    
 }
 
  Clear(){
