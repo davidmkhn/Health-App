@@ -78,7 +78,7 @@ TotalWater(){
 async recognizeDisgByDescription(description){
  const responce = await puter.ai.chat(("Який кбжу такої страви?: " + description + 
     "Опиши строго у форматі: назва, вага г, калорії, білки г, жири г, вуглеводи г"),
-     {model: "gpt-5.1"});
+     {model: "gpt-5.1", temperature: 0.1});
      console.log(responce.message.content);
 }
 
