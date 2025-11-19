@@ -74,6 +74,14 @@ TotalWater(){
     )
 }
 
+
+async recognizeDisgByDescription(description){
+ const responce = await puter.ai.chat(("Який кбжу такої страви?: " + description + 
+    "Опиши строго у форматі: назва, вага г, калорії, білки г, жири г, вуглеводи г"),
+     {model: "gpt-5.1"});
+     console.log(responce.message.content);
+}
+
 removeDish(name){
     this.cpfc = this.cpfc.filter(dish => dish.name !== name);
     
@@ -86,6 +94,11 @@ removeDish(name){
 
 const KBZHU = new kbzhu_tracker;
 const Bot1 = new User("Джейк", "Чоловік", 84, 186, 34, 1.25);
+
+
+KBZHU.recognizeDisgByDescription("Біг Мак з McDonalds");
+
+
 
 KBZHU.goal = Bot1.goalCPFC;
 console.log(KBZHU.goal);
