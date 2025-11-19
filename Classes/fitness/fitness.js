@@ -1,64 +1,78 @@
+class Exercise {
+  constructor(name, group, calories, level) {
+    this.name = name;
+    this.group = group;
+    this.calories = calories;
+    this.level = level;
+  }
+}
+
+class Workout {
+  constructor(date, level, exercises) {
+    this.date = date
+    this.level = level;
+    this.exercises = exercises.filter(ex => ex.level == level);
+  }
+
+  showWorkout() {
+    console.log(`Дата тренування: ${this.date}`);
+    console.log(`Тренування рівня ${this.level}:`);
+    console.log(this.exercises);
+  }
+}
+
 class Fitness {
   constructor() {
     this.exercises = [];
+    this.workouts = [];
     this.favorites = [];
-    this.currentWorkout = [];
-//  this.workoutHistory = [];
-//  this.streak = 0;
-//  this.lastTrainingDate = null;
+    this.currentWorkout = null;
   }
 
-  add_Exercises(name, grup, calories, level) {
-    this.exercises.push({name, grup, calories, level})
+  add_Exercise(name, group, calories, level) {
+    const exercise = new Exercise(name, group, calories, level);
+    this.exercises.push(exercise);
   }
 
-  add_Favotites(name){
-    let found = this.exercises.find(exercises => exercises.name === name)
-    if (found == undefined) {
-      console.log("Такої вправи немає")
+  add_Favorite(name) {
+    const found = this.exercises.find(ex => ex.name === name);
+    if (!found) {
+      console.log("Такої вправи немає");
+      return;
     }
-    this.favorites.push(found)
+    this.favorites.push(found);
   }
 
   new_Workout() {
-    this.currentWorkout = [];
-
     console.log("Рівень тренування?\n 1. easy\n 2. medium\n 3. hard\n");
-    let level = prompt("введіть цифру: ")
+    const level = Number(prompt("Введіть цифру: "));
+    const date = new Date().toLocaleDateString();
 
     if (level < 1 || level > 3) {
-      console.log("Введіть корекне число")
-      return this.new_Workout()
+      console.log("Введіть коректне число");
+      return this.new_Workout();
     }
 
-    for (let index = 0; index < this.exercises.length; index++) {
-      if (this.exercises[index].level == level) {
-        this.currentWorkout.push(this.exercises[index])
-      } 
-    }
-
-  //  this.challenge()
-    console.log(this.currentWorkout);
+    this.currentWorkout = new Workout(date, level, this.exercises);
+    this.currentWorkout.showWorkout();
+    this.workouts.push(this.currentWorkout)
+    console.log(this.workouts)
   }
-
- // recommended_Exercises() {}
-
- // challenge() {}
 }
 
-///TESTS///
-
+/// TESTS ///
 const fitnessApp = new Fitness();
 
-fitnessApp.add_Exercises("Присід", "333", 354, 3);
-fitnessApp.add_Exercises("Відтискання", "323", 332, 3);
-fitnessApp.add_Exercises("Підтягування", "133", 332, 1);
+console.log("Додавання вправ:");
+fitnessApp.add_Exercise("Присід", "ноги", 354, 3);
+fitnessApp.add_Exercise("Відтискання", "груди", 332, 2);
+fitnessApp.add_Exercise("Підтягування", "спина", 300, 1);
 console.log(fitnessApp.exercises);
 
-fitnessApp.add_Favotites("Підтягування");
-fitnessApp.add_Favotites("Прес");
-console.log(fitnessApp.favorites); 
+console.log("\nДодавання улюблених вправ:");
+fitnessApp.add_Favorite("Підтягування");
+fitnessApp.add_Favorite("Присід");
+console.log(fitnessApp.favorites);
 
+console.log("\nПочаток нового тренування:");
 fitnessApp.new_Workout();
-
-

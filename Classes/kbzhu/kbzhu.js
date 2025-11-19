@@ -40,6 +40,11 @@ return this.cpfc.filter(dish =>
 );
 }
 
+removeDish(name){
+    this.cpfc = this.cpfc.filter(dish => dish.name !== name);
+    
+}
+
  Clear(){
     this.cpfc = [];
  }
@@ -50,6 +55,8 @@ const KBZHU = new kbzhu_tracker;
  KBZHU.addFood("Суп", 100, 4, 30, 66);
  console.log(KBZHU.TotalCPFC());
  console.log(KBZHU.cpfc);
+  KBZHU.removeDish("Суп");
+  console.log(KBZHU.cpfc);
 KBZHU.Clear();
 console.log(KBZHU.TotalCPFC());
 
