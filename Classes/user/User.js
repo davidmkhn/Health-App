@@ -13,10 +13,17 @@ class Man extends User{
             super(name, weight, height, age, coefActivity);
             this.gender = "Чоловік";
         }
+        calculateGoal(item){
+        return this.goal = ((10*item.weight)+(6.25*item.height)-(5*item.age)-161)*item.coefActivity;
+        }
     }
 class Woman extends User{
     constructor(name, weight, height, age, coefActivity){
             super(name, weight, height, age, coefActivity);
             this.gender = "Жінка";
         }
+        calculateGoal(item){
+        return this.goal = ((10*item.weight)+(6.25*item.height)-(5*item.age)+5)*item.coefActivity;
+        }
 }
+
