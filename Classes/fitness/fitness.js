@@ -6,7 +6,7 @@ class Exercise {
     this.level = level;
   }
 
-  getPlan(level) {
+  getPlan(userLevel) {
     return "Виконувати згідно інструкції";
   }
 }
@@ -17,9 +17,9 @@ class CardioExercise extends Exercise {
     this.duration = duration;
   }
 
-  getPlan(level) {
-    const duration = level * 10;
-    return `Бігти ${duration} хвилин`;
+  getPlan(userLevel) {
+    const duration = this.duration + (userLevel * 5);
+    return `Бігти ${duration} хв`;
   }
 }
 
@@ -30,33 +30,71 @@ class StrengthExercise extends Exercise {
     this.reps = reps;
   }
 
-  getPlan(level) {
-    const sets = level + 1;
-    const currentReps = this.reps + (level * 2);
+  getPlan(userLevel) {
+    const sets = this.sets;
+    const currentReps = this.reps + (userLevel * 2);
     return `${sets} підходи по ${currentReps} разів`;
   }
 }
 
+class ExerciseFactory {
+  static create(type, data) {
+    switch (type) {
+      case 'cardio':
+        return new CardioExercise(data.name, 'cardio', data.calories, data.level, data.duration);
+      case 'strength':
+        return new StrengthExercise(data.name, 'strength', data.calories, data.level, data.sets, data.reps);
+      case 'general':
+      default:
+        return new Exercise(data.name, 'general', data.calories, data.level);
+    }
+  }
+}
+
+class TrainingStrategy {
+  filterExercises(allExercises, userLevel) {
+    return [];
+  }
+}
+
+class LevelStrategy extends TrainingStrategy {
+  filterExercises(allExercises, userLevel) {
+    return allExercises.filter(ex => ex.level === userLevel);
+  }
+}
+
+class CardioOnlyStrategy extends TrainingStrategy {
+  filterExercises(allExercises, userLevel) {
+    return allExercises.filter(ex => ex instanceof CardioExercise);
+  }
+}
+
+class StrengthOnlyStrategy extends TrainingStrategy {
+  filterExercises(allExercises, userLevel) {
+    return allExercises.filter(ex => ex instanceof StrengthExercise);
+  }
+}
+
 class Workout {
-  constructor(date, level, exercises) {
-    this.date = date;
+  constructor(level, exercises) {
+    this.date = new Date().toLocaleDateString();
     this.level = level;
-    this.exercises = exercises.filter(ex => ex.level == level);
+    this.exercises = exercises;
   }
 
   showWorkout() {
-    console.log(`Дата тренування: ${this.date}`);
-    console.log(`Тренування рівня ${this.level}:`);
+    console.log(`\n=== Тренування від ${this.date} ===`);
 
     if (this.exercises.length === 0) {
-      console.log("Немає вправ для цього рівня");
+      console.log("за обраною стратегією вправ не знайдено.");
       return;
     }
 
     this.exercises.forEach(ex => {
       const plan = ex.getPlan(this.level);
-      console.log(`- ${ex.name}: ${plan}`);
+      console.log(`[${ex.group.toUpperCase()}] ${ex.name}: ${plan} (Рівень вправи: ${ex.level})`);
     });
+    console.log("==============================\n");
   }
 }
 
@@ -64,59 +102,44 @@ class Fitness {
   constructor() {
     this.exercises = [];
     this.workouts = [];
-    this.favorites = [];
-    this.currentWorkout = null;
+    this.strategy = new LevelStrategy();
   }
 
-  add_Exercise(name, group, calories, level) {
-    const exercise = new Exercise(name, group, calories, level);
+  addExercise(type, data) {
+    const exercise = ExerciseFactory.create(type, data);
     this.exercises.push(exercise);
   }
 
-  add_Cardio(name, group, calories, level, duration) {
-    const exercise = new CardioExercise(name, group, calories, level, duration);
-    this.exercises.push(exercise);
+  setStrategy(newStrategy) {
+    this.strategy = newStrategy;
   }
 
-  add_Strength(name, group, calories, level, sets, reps) {
-    const exercise = new StrengthExercise(name, group, calories, level, sets, reps);
-    this.exercises.push(exercise);
-  }
-
-  add_Favorite(name) {
-    const found = this.exercises.find(ex => ex.name === name);
-    if (!found) {
-      console.log("Такої вправи немає");
-      return;
-    }
-    this.favorites.push(found);
-  }
-
-  new_Workout() {
-    console.log("Рівень тренування?\n 1. easy\n 2. medium\n 3. hard\n");
-    const input = prompt("Введіть цифру: ");
-    const level = Number(input);
-    const date = new Date().toLocaleDateString();
-
-    if (level < 1 || level > 3) {
-      console.log("Введіть коректне число");
-      return;
-    }
-
-    this.currentWorkout = new Workout(date, level, this.exercises);
-    this.currentWorkout.showWorkout();
-    this.workouts.push(this.currentWorkout);
+  createWorkout(userLevel) {
+    const selectedExercises = this.strategy.filterExercises(this.exercises, userLevel);
+    const workout = new Workout(userLevel, selectedExercises);
+    this.workouts.push(workout);
+    workout.showWorkout();
   }
 }
 
 ///  Test  ///
+
 const fitnessApp = new Fitness();
 
-fitnessApp.add_Exercise("Звичайна розминка", "загальна", 100, 1);
-fitnessApp.add_Cardio("Біг", "кардіо", 500, 1, 30);
-fitnessApp.add_Cardio("Спринт", "кардіо", 600, 2, 20);
-fitnessApp.add_Strength("Силовий жим", "груди", 300, 2, 3, 10);
-fitnessApp.add_Strength("Присідання з вагою", "ноги", 400, 3, 4, 8);
+fitnessApp.addExercise('general', { name: "Розминка суглобів", calories: 50, level: 1 });
+fitnessApp.addExercise('cardio', { name: "Біг", calories: 300, level: 1, duration: 20 });
+fitnessApp.addExercise('cardio', { name: "Інтервальний спринт", calories: 600, level: 3, duration: 15 });
+fitnessApp.addExercise('strength', { name: "Жим лежачи", calories: 200, level: 2, sets: 3, reps: 10 });
+fitnessApp.addExercise('strength', { name: "Присідання", calories: 250, level: 1, sets: 4, reps: 12 });
+fitnessApp.addExercise('strength', { name: "Станова тяга", calories: 400, level: 3, sets: 5, reps: 5 });
 
-console.log("Створення тренування...");
-fitnessApp.new_Workout();
+console.log("TEST 1: Стандартна стратегія (за рівнем 1)");
+fitnessApp.createWorkout(1);
+
+console.log("TEST 2: Стратегія 'Тільки Силові' (Рівень користувача 2)");
+fitnessApp.setStrategy(new StrengthOnlyStrategy());
+fitnessApp.createWorkout(2);
+
+console.log("TEST 3: Стратегія 'Тільки Кардіо'");
+fitnessApp.setStrategy(new CardioOnlyStrategy());
+fitnessApp.createWorkout(2);
